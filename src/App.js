@@ -19,12 +19,14 @@ import "./App.css";
 // const geocoder = NodeGeocoder(options);
 
 const getColor = categoria => {
+  console.log("categoria", categoria);
   if (categoria === "Movilidad")
     return `http://maps.google.com/mapfiles/ms/icons/red-dot.png`;
   else if (categoria === "Seguridad")
     return `http://maps.google.com/mapfiles/ms/icons/blue-dot.png`;
   else if (categoria === "Medio ambiente")
     return `http://maps.google.com/mapfiles/ms/icons/green-dot.png`;
+  else return `http://maps.google.com/mapfiles/ms/icons/purple-dot.png`;
 };
 
 const MyMapComponent = compose(
@@ -56,7 +58,7 @@ const MyMapComponent = compose(
     }}
   >
     {props.isMarkerShown &&
-      props.reportes.map(option => {
+      props.reportes.concat(props.eventos).map(option => {
         if (option.categoria === "Medio ambiente" && !props.showAmbiente) {
           return null;
         } else if (option.categoria === "Seguridad" && !props.showSeguridad) {
@@ -68,9 +70,9 @@ const MyMapComponent = compose(
             <Marker
               key={option.key}
               position={{ lat: option.latitud, lng: option.longitud }}
-              icon={getColor(option.categoria)}
+              icon={getColor(option.nombre || option.categoria)}
               label={{
-                text: option.likes.toString(),
+                text: option.likes ? option.likes.toString() : ".",
                 fontWeight: "400",
                 color: "white",
                 fontSize: "12px",
@@ -244,6 +246,7 @@ class App extends Component {
                 isMarkerShown={this.state.isMarkerShown}
                 onMarkerClick={this.handleMarkerClick}
                 reportes={Reporte}
+                eventos={Evento}
                 showMovilidad={showMovilidad}
                 showSeguridad={showSeguridad}
                 showAmbiente={showAmbiente}
@@ -302,7 +305,7 @@ class App extends Component {
                           <tr
                             key={option.key}
                             style={{ color: this.getColorTr(option.categoria) }}
-                            className={option.likes > 5 ? "flashit" : ""}
+                            className={option.likes >= 5 ? "flashit" : ""}
                           >
                             <td>{option.autor}</td>
                             <td>{option.titulo}</td>
