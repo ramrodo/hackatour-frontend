@@ -28,7 +28,7 @@ input[type="checkbox"] {
 }
 
 .dashboard {
-  height: 2000px;
+  height: 3400px;
 }
 
 .grid-container {
@@ -109,12 +109,13 @@ input {
   background-color: #f2f2f2;
 }
 
-#table-reportes tr:nth-child(20) {
+#table-reportes tr:nth-child(35) {
   background-color: #a3a3c2;
 }
 
 #table-reportes tr:hover {
-  background-color: #ddd;
+  box-shadow: 10px 10px 5px grey;
+  background-color: #99ffcc;
 }
 
 #table-reportes th {
