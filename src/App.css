@@ -9,7 +9,7 @@
 
 .App-header {
   background-color: #222;
-  height: 50px;
+  height: 100px;
   padding: 20px;
   color: white;
 }
@@ -22,15 +22,22 @@
   font-size: large;
 }
 
+input[type="checkbox"] {
+  transform: scale(1.5);
+  margin-right: 10px;
+}
+
 .dashboard {
-  margin-top: 50px;
   height: 2000px;
 }
 
 .grid-container {
   height: 100%;
   display: grid;
-  grid-template-columns: auto auto;
+  /* grid-template-columns: auto auto; */
+  grid-template-areas:
+    "header header header header header header"
+    "main main main right right right";
   grid-gap: 10px;
   background-color: #2196f3;
   padding: 10px;
@@ -42,16 +49,105 @@
   padding: 20px;
   font-size: 16px;
   text-align: center;
-  min-width: 400px;
+}
+
+#reportes {
+  min-height: 1600px;
+}
+
+#eventos,
+#categorias,
+#registro-eventos {
+  font-size: 20px;
+}
+
+#categorias {
+  float: right;
+  display: inline-block;
+}
+
+.label {
+  display: grid;
+  padding-bottom: 10px;
+}
+
+.header {
+  grid-area: header;
+}
+
+.main {
+  grid-area: main;
+}
+.right {
+  grid-area: right;
 }
 
 img {
   animation: pulse 0.5s infinite alternate;
 }
 
-.reportes-container {
+select,
+input {
+  height: 30px;
+  font-size: 20px;
+}
+
+#table-reportes {
+  padding-top: 30px;
   margin: auto;
-  width: 85%;
+  width: 80%;
+  text-align: left;
+}
+
+#table-reportes td,
+#table-reportes th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#table-reportes tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#table-reportes tr:hover {
+  background-color: #ddd;
+}
+
+#table-reportes th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4caf50;
+  color: white;
+}
+
+.flashit {
+  background-color: yellow !important;
+  -webkit-animation: flash linear 1s infinite;
+  animation: flash linear 1s infinite;
+}
+
+@-webkit-keyframes flash {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes flash {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes App-logo-spin {

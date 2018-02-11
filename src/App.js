@@ -6,17 +6,17 @@ import {
   GoogleMap,
   Marker,
 } from "react-google-maps";
-import NodeGeocoder from "node-geocoder";
+// import NodeGeocoder from "node-geocoder";
 
 import fire from "./fire";
 // import logo from "./logo.svg";
 import "./App.css";
 
-const options = {
-  provider: "google",
-  apiKey: "AIzaSyCO8zsBS9i2UPEs-xkcF4ygZMh_OlpCx4A",
-};
-const geocoder = NodeGeocoder(options);
+// const options = {
+//   provider: "google",
+//   apiKey: "AIzaSyCO8zsBS9i2UPEs-xkcF4ygZMh_OlpCx4A",
+// };
+// const geocoder = NodeGeocoder(options);
 
 const getColor = categoria => {
   if (categoria === "Movilidad")
@@ -32,33 +32,53 @@ const MyMapComponent = compose(
     googleMapURL:
       "https://maps.googleapis.com/maps/api/js?key=AIzaSyDtnzn6GAYUxmhXzLmulUJ7hIaacpbgNUs&v=3.exp&libraries=geometry,drawing,places",
     loadingElement: <div style={{ height: `100%` }} />,
-    containerElement: <div style={{ height: `400px` }} />,
+    containerElement: (
+      <div
+        style={{
+          height: `400px`,
+          width: `80%`,
+          margin: `auto`,
+          display: `inline-block`,
+        }}
+      />
+    ),
     mapElement: <div style={{ height: `100%` }} />,
   }),
   withScriptjs,
   withGoogleMap,
 )(props => (
   <GoogleMap
-    defaultZoom={11}
+    id="map"
+    defaultZoom={12}
     defaultCenter={{
-      lat: 20.704474963514798,
-      lng: -103.38925581425428,
+      lat: 20.675548,
+      lng: -103.3421187,
     }}
   >
     {props.isMarkerShown &&
-      props.reportes.map(option => (
-        <Marker
-          key={option.key}
-          position={{ lat: option.latitud, lng: option.longitud }}
-          icon={getColor(option.categoria)}
-          label={{
-            text: option.likes.toString(),
-            fontWeight: "400",
-            color: "white",
-            fontSize: "12px",
-          }}
-        />
-      ))}
+      props.reportes.map(option => {
+        if (option.categoria === "Medio ambiente" && !props.showAmbiente) {
+          return null;
+        } else if (option.categoria === "Seguridad" && !props.showSeguridad) {
+          return null;
+        } else if (option.categoria === "Movilidad" && !props.showMovilidad) {
+          return null;
+        } else {
+          return (
+            <Marker
+              key={option.key}
+              position={{ lat: option.latitud, lng: option.longitud }}
+              icon={getColor(option.categoria)}
+              label={{
+                text: option.likes.toString(),
+                fontWeight: "400",
+                color: "white",
+                fontSize: "12px",
+              }}
+            />
+          );
+        }
+      })}
   </GoogleMap>
 ));
 
@@ -72,6 +92,11 @@ class App extends Component {
       categoria: {},
       isMarkerShown: false,
       localidades: [],
+      showMovilidad: true,
+      showSeguridad: true,
+      showAmbiente: true,
+      eventName: "",
+      eventCategory: "Movilidad",
     };
   }
 
@@ -122,8 +147,11 @@ class App extends Component {
 
     snapshot.forEach(childSnapshot => {
       let item = childSnapshot.val();
-      item.key = childSnapshot.key;
-      returnArr.push(item);
+      // console.log("item", item);
+      if (typeof item === "object") {
+        item.key = childSnapshot.key;
+        returnArr.push(item);
+      }
     });
 
     return returnArr;
@@ -150,78 +178,188 @@ class App extends Component {
   //     });
   // };
 
-  render() {
-    const { Reporte, Evento, categoria } = this.state;
+  show = categoria => {
+    if (categoria === "Movilidad") {
+      return this.state.showMovilidad;
+    } else if (categoria === "Seguridad") {
+      return this.state.showSeguridad;
+    } else if (categoria === "Medio ambiente") {
+      return this.state.showAmbiente;
+    }
+  };
 
-    // if (Object.keys(Reporte).length !== 0) {
-    //   Reporte.map(option => {
-    //     this.getLocation(option.latitud, option.longitud);
-    //   });
-    // }
+  onChangeCheckbox = categoria => {
+    if (categoria === "Movilidad") {
+      this.setState({ showMovilidad: !this.state.showMovilidad });
+    } else if (categoria === "Seguridad") {
+      this.setState({ showSeguridad: !this.state.showSeguridad });
+    } else if (categoria === "Medio ambiente") {
+      this.setState({ showAmbiente: !this.state.showAmbiente });
+    }
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+
+    const { eventName, eventCategory } = this.state;
+
+    const ref = fire.database().ref();
+    const eventsRef = ref.child("Evento");
+    eventsRef.push({
+      nombre: eventName,
+      categoria: eventCategory,
+    });
+  };
+
+  handleChangeSelect = event => {
+    this.setState({ eventCategory: event.target.value });
+  };
+
+  onChangeEventName = eventName => {
+    this.setState({ eventName: eventName.target.value });
+  };
+
+  render() {
+    const {
+      Reporte,
+      Evento,
+      categoria,
+      showMovilidad,
+      showSeguridad,
+      showAmbiente,
+      eventCategory,
+    } = this.state;
 
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">S.E.R.V.I.C.E - SeedDevelopment</h1>
+          <h2>Reto iTexico & Reto Bosch</h2>
         </header>
         <div className="dashboard">
           <div className="grid-container">
-            <div id="reportes" className="grid-item">
+            <div id="reportes" className="grid-item header">
               <h1>Reportes</h1>
               <MyMapComponent
                 isMarkerShown={this.state.isMarkerShown}
                 onMarkerClick={this.handleMarkerClick}
                 reportes={Reporte}
+                showMovilidad={showMovilidad}
+                showSeguridad={showSeguridad}
+                showAmbiente={showAmbiente}
               />
-              <table className="reportes-container">
+
+              <div id="categorias">
+                <h4>Categorías</h4>
+                {Object.keys(categoria).length !== 0 &&
+                  categoria.map(option => (
+                    <div
+                      key={option.key}
+                      style={{ color: this.getColorTr(option.nombre) }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="categoria"
+                        className="checkbox"
+                        onChange={() => this.onChangeCheckbox(option.nombre)}
+                        checked={this.show(option.nombre)}
+                      />
+                      {option.nombre}
+                    </div>
+                  ))}
+              </div>
+
+              <table id="table-reportes">
                 <thead>
                   <tr>
                     <th>Usuario</th>
                     <th>Título</th>
+                    <th>Descripción</th>
                     <th>Likes</th>
                     {/* <th>Localidad</th> */}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody">
                   {Object.keys(Reporte).length !== 0 &&
-                    Reporte.map(option => (
-                      <tr
-                        key={option.key}
-                        style={{ color: this.getColorTr(option.categoria) }}
-                      >
-                        <td>{option.autor}</td>
-                        <td>{option.titulo}</td>
-                        <td>{option.likes}</td>
-                        {/* <td>
-                          {this.getLocation(option.latitud, option.longitud)}
-                        </td> */}
-                      </tr>
-                    ))}
+                    Reporte.map(option => {
+                      if (
+                        option.categoria === "Medio ambiente" &&
+                        !showAmbiente
+                      ) {
+                        return null;
+                      } else if (
+                        option.categoria === "Seguridad" &&
+                        !showSeguridad
+                      ) {
+                        return null;
+                      } else if (
+                        option.categoria === "Movilidad" &&
+                        !showMovilidad
+                      ) {
+                        return null;
+                      } else {
+                        return (
+                          <tr
+                            key={option.key}
+                            style={{ color: this.getColorTr(option.categoria) }}
+                            className={option.likes > 5 ? "flashit" : ""}
+                          >
+                            <td>{option.autor}</td>
+                            <td>{option.titulo}</td>
+                            <td>{option.descripcion}</td>
+                            <td>{option.likes}</td>
+                            {/* <td>
+                            {this.getLocation(option.latitud, option.longitud)}
+                          </td> */}
+                          </tr>
+                        );
+                      }
+                    })}
                 </tbody>
               </table>
             </div>
-            <div id="zonas-riesgo" className="grid-item">
-              <h1>Zonas de mayor riesgo</h1>
-            </div>
-            <div id="eventos" className="grid-item">
+
+            <div id="eventos" className="grid-item main">
               <h1>Eventos</h1>
               <ul>
                 {Object.keys(Evento).length !== 0 &&
                   Evento.map(option => (
-                    <li key={option.key}>{option.nombre}</li>
-                  ))}
-              </ul>
-            </div>
-            <div id="categorias" className="grid-item">
-              <h1>Categorías</h1>
-              <ul>
-                {Object.keys(categoria).length !== 0 &&
-                  categoria.map(option => (
-                    <li key={option.key} style={{ color: option.color }}>
+                    <li
+                      key={option.key}
+                      style={{ color: this.getColorTr(option.categoria) }}
+                    >
                       {option.nombre}
                     </li>
                   ))}
               </ul>
+            </div>
+
+            <div id="registro-eventos" className="grid-item right">
+              <h1>Añadir Evento</h1>
+              <form onSubmit={this.handleSubmit}>
+                <label className="label">
+                  Name:
+                  <input
+                    onChange={this.onChangeEventName}
+                    type="text"
+                    name="name"
+                  />
+                </label>
+                <label className="label">
+                  Categoría:
+                  <select
+                    value={eventCategory}
+                    onChange={this.handleChangeSelect}
+                  >
+                    <option defaultValue value="Movilidad">
+                      Movilidad
+                    </option>
+                    <option value="Seguridad">Seguridad</option>
+                    <option value="Medio ambiente">Medio ambiente</option>
+                  </select>
+                </label>
+                <input type="submit" value="Submit" />
+              </form>
             </div>
           </div>
         </div>
