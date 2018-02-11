@@ -234,7 +234,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">S.E.R.V.I.C.E - SeedDevelopment</h1>
-          <h2>Reto iTexico & Reto Bosch</h2>
+          <h2>Reto iTexico</h2>
         </header>
         <div className="dashboard">
           <div className="grid-container">
@@ -358,7 +358,7 @@ class App extends Component {
                     <option value="Medio ambiente">Medio ambiente</option>
                   </select>
                 </label>
-                <input type="submit" value="Submit" />
+                <input id="submitEvent" type="submit" value="Crear" />
               </form>
             </div>
           </div>
